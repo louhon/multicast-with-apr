@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 
     apr_pool_create(&pool, NULL);
     
-    apr_socket_create(&sock, APR_INET, SOCK_DGRAM, APR_PROTO_UDP, pool);
+    apr_socket_create(&sock, APR_INET6, SOCK_DGRAM, APR_PROTO_UDP, pool);
 
     if (sock) {
         printf("socket created at:%p\n", sock);
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 
     apr_sockaddr_t *local_addr = NULL;
 
-    apr_sockaddr_info_get(&local_addr, argv[1], APR_INET, is_src ? 20000 : 30000, 0, pool);
+    apr_sockaddr_info_get(&local_addr, argv[1], APR_INET6, is_src ? 20000 : 30000, 0, pool);
 
     ret = apr_socket_bind(sock, local_addr);
 
@@ -50,10 +50,13 @@ int main(int argc, char *argv[])
 
     apr_sockaddr_t * dst = NULL;
 
-    ret = apr_sockaddr_info_get(&dst, "224.0.0.188", APR_INET, 30000, 0, pool);
+    ret = apr_sockaddr_info_get(&dst, "ff08::8", APR_INET6, 30001, 0, pool);
 
     if (ret == APR_SUCCESS) {
         puts("dst addr ok!");
+    }else{
+        puts("invalid dst addr?");
+        exit(-1);
     }
 
 
@@ -121,7 +124,7 @@ int main(int argc, char *argv[])
             printf("join mcast ok!\n");
         }
 
-        char msg[20] = { 0 };
+        char msg[2000] = { 0 };
 
         while (1) {
             apr_sleep(100 * 1000);
@@ -140,8 +143,7 @@ int main(int argc, char *argv[])
             apr_socket_recvfrom(&from, sock, MSG_DONTWAIT, msg, &size);
 
             if (ret == APR_SUCCESS && size > 0) {
-                printf("recv ok! ");
-                printf("msg:%s", msg);
+                printf("recv ok! \n");
             }
             
         }
